@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /services/{document=**} {
+      // Cualquier usuario puede ver los servicios
+      allow read: if true;
+      // Solo admins pueden crear/editar/borrar servicios
+      allow write: if request.auth.token.email in ['rosty503@gmail.com', 'nextor.salinas@gmail.com'];
+    }
+    
+    match /reservations/{document=**} {
+      allow read, write: if true;
+    }
+    
+    match /chats/{document=**} {
+      // Temporalmente abierto para el chat, idealmente filtrar por auth.uid
+      allow read, write: if true;
+    }
+  }
+}

@@ -1,0 +1,22 @@
+[debug] [2026-06-14T00:28:29.689Z] ----------------------------------------------------------------------
+[debug] [2026-06-14T00:28:29.693Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\HP\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js apps:list --project glam-graduacion-ai
+[debug] [2026-06-14T00:28:29.693Z] CLI Version:   14.9.0
+[debug] [2026-06-14T00:28:29.694Z] Platform:      win32
+[debug] [2026-06-14T00:28:29.694Z] Node Version:  v22.14.0
+[debug] [2026-06-14T00:28:29.694Z] Time:          Sat Jun 13 2026 18:28:29 GMT-0600 (hora estándar central)
+[debug] [2026-06-14T00:28:29.694Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-14T00:28:29.701Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-14T00:28:29.702Z] > authorizing via signed-in user (nextor.salinas@gmail.com)
+[debug] [2026-06-14T00:28:29.708Z] Checked if tokens are valid: true, expires at: 1781400485221
+[debug] [2026-06-14T00:28:29.709Z] Checked if tokens are valid: true, expires at: 1781400485221
+[debug] [2026-06-14T00:28:29.711Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/glam-graduacion-ai:searchApps pageSize=100
+[debug] [2026-06-14T00:28:30.017Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/glam-graduacion-ai:searchApps 404
+[debug] [2026-06-14T00:28:30.018Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/glam-graduacion-ai:searchApps {"error":{"code":404,"message":"Firebase project 323593141460 not found.","status":"NOT_FOUND"}}
+[debug] [2026-06-14T00:28:30.018Z] Request to https://firebase.googleapis.com/v1beta1/projects/glam-graduacion-ai:searchApps?pageSize=100 had HTTP Error: 404, Firebase project 323593141460 not found.
+[debug] [2026-06-14T00:28:30.268Z] FirebaseError: Request to https://firebase.googleapis.com/v1beta1/projects/glam-graduacion-ai:searchApps?pageSize=100 had HTTP Error: 404, Firebase project 323593141460 not found.
+    at responseToError (C:\Users\HP\AppData\Roaming\npm\node_modules\firebase-tools\lib\responseToError.js:52:12)
+    at RetryOperation._fn (C:\Users\HP\AppData\Roaming\npm\node_modules\firebase-tools\lib\apiv2.js:312:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[error] 
+[error] Error: Failed to list Firebase apps. See firebase-debug.log for more info.
