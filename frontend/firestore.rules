@@ -6,7 +6,12 @@ service cloud.firestore {
       // Cualquier usuario puede ver los servicios
       allow read: if true;
       // Solo admins pueden crear/editar/borrar servicios
-      allow write: if request.auth.token.email in ['rosty503@gmail.com', 'nextor.salinas@gmail.com'];
+      allow write: if request.auth.token.email in ['rosty503@gmail.com', 'nextor.salinas@gmail.com', 'nestybarranco@gmail.com'];
+    }
+    
+    match /tips/{document=**} {
+      allow read: if true;
+      allow write: if request.auth.token.email in ['rosty503@gmail.com', 'nextor.salinas@gmail.com', 'nestybarranco@gmail.com'];
     }
     
     match /reservations/{document=**} {

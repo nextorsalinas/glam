@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Video, Camera } from 'lucide-react';
 import BookingModal from './BookingModal';
-import ChatWidget from './ChatWidget';
 import LoginModal from './LoginModal';
 import { useAuth } from '../context/AuthContext';
 
@@ -337,19 +336,16 @@ const Catalog = () => {
         </div>
       </div>
 
-      {/* Conditionally render Chat and Reservar button ONLY if current slide is NOT a video */}
+      {/* Conditionally render Reservar button ONLY if current slide is NOT a video */}
       {itemsToRender[activeIndex] && !itemsToRender[activeIndex].videoUrl && (
-        <>
-          <div className="fixed bottom-6 left-6 z-[60]">
-            <button 
-              onClick={() => handleBookClick(itemsToRender[activeIndex])}
-              className="py-2.5 px-6 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-sm rounded-full shadow-lg shadow-pink-500/40 active:scale-95 transition-all"
-            >
-              Reservar ahora
-            </button>
-          </div>
-          <ChatWidget />
-        </>
+        <div className="fixed bottom-24 left-6 z-[60]">
+          <button 
+            onClick={() => handleBookClick(itemsToRender[activeIndex])}
+            className="py-2.5 px-6 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-sm rounded-full shadow-lg shadow-pink-500/40 active:scale-95 transition-all"
+          >
+            Reservar ahora
+          </button>
+        </div>
       )}
       
       <BookingModal 

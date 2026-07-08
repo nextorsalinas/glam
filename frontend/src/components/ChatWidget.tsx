@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, X, MessageSquare, Phone } from 'lucide-react';
+import { Send, X, Phone } from 'lucide-react';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -39,6 +39,15 @@ const ChatWidget = () => {
     // Auto scroll al último mensaje
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    const handleToggleChat = () => {
+      setIsOpen(prev => !prev);
+    };
+    
+    window.addEventListener('toggle-chat', handleToggleChat);
+    return () => window.removeEventListener('toggle-chat', handleToggleChat);
+  }, []);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +105,7 @@ const ChatWidget = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-4 md:right-6 z-[60] flex flex-col items-end">
+    <div className="fixed bottom-24 right-4 md:right-6 z-[60] flex flex-col items-end">
       {/* Ventana de Chat */}
       {isOpen && (
         <div className="w-[calc(100vw-2rem)] sm:w-[380px] h-[500px] max-h-[calc(100dvh-120px)] max-h-[calc(100vh-120px)] bg-white rounded-3xl shadow-2xl shadow-pink-500/15 border border-pink-100 flex flex-col mb-4 overflow-hidden animate-in slide-in-from-bottom-5 duration-200">
@@ -199,18 +208,7 @@ const ChatWidget = () => {
         </div>
       )}
 
-      {/* Burbuja Flotante de Chat */}
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 ${
-          isOpen 
-            ? 'bg-slate-800 rotate-90 shadow-slate-800/35' 
-            : 'bg-gradient-to-r from-pink-500 to-purple-600 shadow-pink-500/35'
-        }`}
-        title={isOpen ? "Cerrar Chat" : "Chatear con la IA / WhatsApp"}
-      >
-        {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
-      </button>
+
     </div>
   );
 };

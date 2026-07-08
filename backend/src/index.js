@@ -2,9 +2,20 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { db } = require('./config/firebase');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+const s3Client = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  }
+});
 
 app.use(cors());
 app.use(express.json());
@@ -17,6 +28,28 @@ const { initializeWhatsApp, getWhatsAppStatus, logoutWhatsApp } = require('./ser
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend de Graduaciones activo' });
+});
+
+app.post('/api/upload/presigned', async (req, res) => {
+  try {
+    const { filename, contentType } = req.body;
+    if (!filename) return res.status(400).json({ error: 'Filename is required' });
+
+    const key = `uploads/${Date.now()}_${filename.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: key,
+      ContentType: contentType || 'application/octet-stream',
+    });
+
+    const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    
+    res.json({ presignedUrl: url, key });
+  } catch (err) {
+    console.error('Error generating presigned url:', err);
+    res.status(500).json({ error: 'Failed to generate upload URL' });
+  }
 });
 app.get('/api/services', async (req, res) => {
   try {

@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { db, storage } from '../config/firebase';
+import { db } from '../config/firebase';
 import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Calendar, Image as ImageIcon, Save, Plus, Trash2, Video, MessageCircle } from 'lucide-react';
+import { LogOut, Calendar, Image as ImageIcon, Save, Plus, Trash2, Video, MessageCircle, Sparkles } from 'lucide-react';
+import AdminTipsTab from './AdminTipsTab';
 
-const ALLOWED_EMAILS = ['rosty503@gmail.com', 'nextor.salinas@gmail.com'];
+const ALLOWED_EMAILS = ['rosty503@gmail.com', 'nextor.salinas@gmail.com', 'nestybarranco@gmail.com'];
 const API_URL = import.meta.env.VITE_API_URL || 'https://api.glam.alexandrapink.online';
+const R2_PUBLIC_URL = import.meta.env.VITE_R2_PUBLIC_URL || 'https://pub-CAMBIAME.r2.dev';
 
 const ImageCropperModal: React.FC<{
   imageSrc: string;
@@ -226,7 +227,14 @@ interface Service {
 const AdminPanel = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'reservations' | 'services' | 'whatsapp'>('reservations');
+
+  useEffect(() => {
+    if (window.location.hostname.includes('alexandrapink.online')) {
+      window.location.href = 'https://alexandra-styles.web.app/admin';
+    }
+  }, []);
+
+  const [activeTab, setActiveTab] = useState<'reservations' | 'services' | 'whatsapp' | 'tips'>('reservations');
   const [loading, setLoading] = useState(true);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
 
@@ -435,9 +443,22 @@ const AdminPanel = () => {
       let imageUrl = 'https://pub-9e7a27440b204a97b7ddc8deddeb8e95.r2.dev/images/chongo_bajo_pulido.webp';
       
       if (newImageFile) {
-        const storageRef = ref(storage, `services/${docRef.id}_image_${Date.now()}_${newImageFile.name}`);
-        await uploadBytes(storageRef, newImageFile);
-        imageUrl = await getDownloadURL(storageRef);
+        const response = await fetch(`${API_URL}/api/upload/presigned`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: newImageFile.name, contentType: newImageFile.type })
+        });
+        if (!response.ok) throw new Error("Error al obtener URL de subida");
+        const { presignedUrl, key } = await response.json();
+
+        const uploadRes = await fetch(presignedUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': newImageFile.type },
+          body: newImageFile
+        });
+        if (!uploadRes.ok) throw new Error("Error subiendo imagen a Cloudflare R2");
+
+        imageUrl = `${R2_PUBLIC_URL}/${key}`;
         await updateDoc(docRef, { imageUrl });
       } else {
         await updateDoc(docRef, { imageUrl });
@@ -466,9 +487,23 @@ const AdminPanel = () => {
 
     try {
       alert(`Subiendo ${type}... Por favor espera.`);
-      const storageRef = ref(storage, `services/${serviceId}_${type}_${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
+      
+      const response = await fetch(`${API_URL}/api/upload/presigned`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, contentType: file.type })
+      });
+      if (!response.ok) throw new Error("Error al obtener URL de subida");
+      const { presignedUrl, key } = await response.json();
+
+      const uploadRes = await fetch(presignedUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file
+      });
+      if (!uploadRes.ok) throw new Error("Error subiendo archivo a Cloudflare R2");
+
+      const url = `${R2_PUBLIC_URL}/${key}`;
       
       const updateData = type === 'video' ? { videoUrl: url } : type === 'thumbnail' ? { thumbnailUrl: url } : { imageUrl: url };
       await updateDoc(doc(db, 'services', serviceId), updateData);
@@ -509,6 +544,12 @@ const AdminPanel = () => {
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'whatsapp' ? 'bg-pink-600' : 'hover:bg-slate-800'}`}
           >
             <MessageCircle size={20} /> Asistente Glamy
+          </button>
+          <button 
+            onClick={() => setActiveTab('tips')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'tips' ? 'bg-pink-600' : 'hover:bg-slate-800'}`}
+          >
+            <Sparkles size={20} /> Tips y Blog
           </button>
         </nav>
         <div className="p-4">
@@ -740,7 +781,7 @@ const AdminPanel = () => {
 
         {/* MODAL CREAR PEINADO */}
         {isCreateModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div className="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl">
               {/* Header */}
               <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-5 text-white flex justify-between items-center">
@@ -938,6 +979,10 @@ const AdminPanel = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {activeTab === 'tips' && (
+          <AdminTipsTab />
         )}
 
         {/* MODAL RECORTAR IMAGEN */}
